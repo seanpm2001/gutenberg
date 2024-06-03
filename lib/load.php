@@ -40,6 +40,10 @@ if ( class_exists( 'WP_REST_Controller' ) ) {
 	require __DIR__ . '/compat/wordpress-6.6/class-gutenberg-rest-templates-controller-6-6.php';
 	require __DIR__ . '/compat/wordpress-6.6/rest-api.php';
 
+	// WordPress 6.7 compat.
+	require __DIR__ . '/compat/wordpress-6.7/class-gutenberg-rest-templates-controller-6-7.php';
+	require __DIR__ . '/compat/wordpress-6.7/rest-api.php';
+
 	// Plugin specific code.
 	require_once __DIR__ . '/class-wp-rest-global-styles-controller-gutenberg.php';
 	require_once __DIR__ . '/class-wp-rest-edit-site-export-controller-gutenberg.php';
@@ -100,6 +104,7 @@ require __DIR__ . '/compat/wordpress-6.6/post.php';
 // WordPress 6.7 compat.
 require __DIR__ . '/compat/wordpress-6.7/blocks.php';
 require __DIR__ . '/compat/wordpress-6.7/block-bindings.php';
+require __DIR__ . '/compat/wordpress-6.7/compat.php';
 
 // Experimental features.
 require __DIR__ . '/experimental/block-editor-settings-mobile.php';
@@ -138,7 +143,9 @@ require __DIR__ . '/class-wp-theme-json-gutenberg.php';
 require __DIR__ . '/class-wp-theme-json-resolver-gutenberg.php';
 require __DIR__ . '/class-wp-theme-json-schema-gutenberg.php';
 require __DIR__ . '/class-wp-duotone-gutenberg.php';
+require __DIR__ . '/class-wp-block-templates-registry.php';
 require __DIR__ . '/blocks.php';
+require __DIR__ . '/block-templates.php';
 require __DIR__ . '/block-editor-settings.php';
 require __DIR__ . '/client-assets.php';
 require __DIR__ . '/demo.php';
