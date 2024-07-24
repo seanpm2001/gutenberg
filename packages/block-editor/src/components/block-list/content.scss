@@ -462,3 +462,8 @@ _::-webkit-full-page-media, _:future, :root .has-multi-selection .block-editor-b
 		margin-bottom: auto;
 	}
 }
+
+.zoom-out-separator {
+	/* same color as the iframe's background */
+	background: $gray-300;
+}
