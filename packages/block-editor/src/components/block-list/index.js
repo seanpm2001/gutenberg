@@ -268,18 +268,19 @@ function Items( {
 			isSectionBlock = true;
 		}
 
-		if ( isSectionBlock ) {
-			if ( position === 'top' ) {
-				isVisible =
-					blockInsertionPoint.index === 0 &&
-					clientId === sectionClientIds[ blockInsertionPoint.index ];
-			}
+		if ( ! isSectionBlock ) {
+			return null;
+		}
 
-			if ( position === 'bottom' ) {
-				isVisible =
-					clientId ===
-					sectionClientIds[ blockInsertionPoint.index - 1 ];
-			}
+		if ( position === 'top' ) {
+			isVisible =
+				blockInsertionPoint.index === 0 &&
+				clientId === sectionClientIds[ blockInsertionPoint.index ];
+		}
+
+		if ( position === 'bottom' ) {
+			isVisible =
+				clientId === sectionClientIds[ blockInsertionPoint.index - 1 ];
 		}
 
 		return (
