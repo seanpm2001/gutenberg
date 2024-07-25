@@ -250,20 +250,38 @@ function Items( {
 		return {};
 	}, [] );
 
-	function isSectionBlock( clientId, sectionIds ) {
-		if ( isZoomOut ) {
-			if ( sectionRootClientId && sectionIds ) {
-				if ( sectionIds?.includes( clientId ) ) {
-					return true;
-				}
-			} else if ( clientId && ! rootClientId ) {
-				return true;
+	const isReducedMotion = useReducedMotion();
+	const renderZoomOutSeparator = ( clientId, position = 'top' ) => {
+		if ( ! isZoomOut || ! clientId ) {
+			return;
+		}
+
+		let isSectionBlock = false;
+		let isVisible = false;
+
+		if (
+			( sectionRootClientId &&
+				sectionClientIds &&
+				sectionClientIds.includes( clientId ) ) ||
+			( clientId && ! rootClientId )
+		) {
+			isSectionBlock = true;
+		}
+
+		if ( isSectionBlock ) {
+			if ( position === 'top' ) {
+				isVisible =
+					blockInsertionPoint.index === 0 &&
+					clientId === sectionClientIds[ blockInsertionPoint.index ];
+			}
+
+			if ( position === 'bottom' ) {
+				isVisible =
+					clientId ===
+					sectionClientIds[ blockInsertionPoint.index - 1 ];
 			}
 		}
-	}
 
-	const isReducedMotion = useReducedMotion();
-	const renderZoomOutSeparator = ( isVisible ) => {
 		return (
 			<AnimatePresence>
 				{ isVisible && (
@@ -295,23 +313,12 @@ function Items( {
 						! selectedBlocks.includes( clientId )
 					}
 				>
-					{ renderZoomOutSeparator(
-						isSectionBlock( clientId, sectionClientIds ) &&
-							blockInsertionPoint.index === 0 &&
-							clientId ===
-								sectionClientIds[ blockInsertionPoint.index ]
-					) }
+					{ renderZoomOutSeparator( clientId, 'top' ) }
 					<BlockListBlock
 						rootClientId={ rootClientId }
 						clientId={ clientId }
 					/>
-					{ renderZoomOutSeparator(
-						isSectionBlock( clientId, sectionClientIds ) &&
-							clientId ===
-								sectionClientIds[
-									blockInsertionPoint.index - 1
-								]
-					) }
+					{ renderZoomOutSeparator( clientId, 'bottom' ) }
 				</AsyncModeProvider>
 			) ) }
 			{ order.length < 1 && placeholder }
