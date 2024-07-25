@@ -2,11 +2,7 @@
  * WordPress dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-<<<<<<< HEAD
 import { useEffect, useState } from '@wordpress/element';
-=======
-import { useEffect, useRef, useState } from '@wordpress/element';
->>>>>>> a728b0d993 (create a function to check when we can add the separators)
 
 /**
  * Internal dependencies
@@ -20,13 +16,9 @@ function ZoomOutModeInserters() {
 	const [ isReady, setIsReady ] = useState( false );
 	const {
 		hasSelection,
-		blockInsertionPoint,
 		blockOrder,
-<<<<<<< HEAD
 		blockInsertionPointVisible,
-=======
 		blockInsertionPoint,
->>>>>>> a728b0d993 (create a function to check when we can add the separators)
 		setInserterIsOpened,
 		sectionRootClientId,
 		selectedBlockClientId,
@@ -39,22 +31,14 @@ function ZoomOutModeInserters() {
 			getSelectionStart,
 			getSelectedBlockClientId,
 			getHoveredBlockClientId,
-<<<<<<< HEAD
 			isBlockInsertionPointVisible,
-=======
-			getBlockInsertionPoint,
->>>>>>> a728b0d993 (create a function to check when we can add the separators)
 		} = select( blockEditorStore );
 		const { sectionRootClientId: root } = unlock( getSettings() );
 		return {
 			hasSelection: !! getSelectionStart().clientId,
-			blockInsertionPoint: getBlockInsertionPoint(),
 			blockOrder: getBlockOrder( root ),
-<<<<<<< HEAD
 			blockInsertionPointVisible: isBlockInsertionPointVisible(),
-=======
 			blockInsertionPoint: getBlockInsertionPoint(),
->>>>>>> a728b0d993 (create a function to check when we can add the separators)
 			sectionRootClientId: root,
 			setInserterIsOpened:
 				getSettings().__experimentalSetIsInserterOpened,
@@ -62,22 +46,8 @@ function ZoomOutModeInserters() {
 			hoveredBlockClientId: getHoveredBlockClientId(),
 		};
 	}, [] );
-<<<<<<< HEAD
 
 	const { showInsertionPoint } = useDispatch( blockEditorStore );
-=======
-	const dispatch = useDispatch( blockEditorStore );
-	const isMounted = useRef( false );
-
-	useEffect( () => {
-		if ( ! isMounted.current ) {
-			isMounted.current = true;
-			return;
-		}
-		// reset insertion point when the block order changes
-		setInserterIsOpened( true );
-	}, [ blockOrder, setInserterIsOpened ] );
->>>>>>> a728b0d993 (create a function to check when we can add the separators)
 
 	// Defer the initial rendering to avoid the jumps due to the animation.
 	useEffect( () => {
@@ -109,7 +79,6 @@ function ZoomOutModeInserters() {
 			hoveredBlockClientId === previousClientId ||
 			hoveredBlockClientId === nextClientId;
 
-		const { showInsertionPoint } = unlock( dispatch );
 		return (
 			<BlockPopoverInbetween
 				key={ index }
