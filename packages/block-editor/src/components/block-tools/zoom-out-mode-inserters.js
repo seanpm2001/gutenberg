@@ -16,9 +16,9 @@ function ZoomOutModeInserters() {
 	const [ isReady, setIsReady ] = useState( false );
 	const {
 		hasSelection,
+		blockInsertionPoint,
 		blockOrder,
 		blockInsertionPointVisible,
-		blockInsertionPoint,
 		setInserterIsOpened,
 		sectionRootClientId,
 		selectedBlockClientId,
@@ -36,9 +36,9 @@ function ZoomOutModeInserters() {
 		const { sectionRootClientId: root } = unlock( getSettings() );
 		return {
 			hasSelection: !! getSelectionStart().clientId,
+			blockInsertionPoint: getBlockInsertionPoint(),
 			blockOrder: getBlockOrder( root ),
 			blockInsertionPointVisible: isBlockInsertionPointVisible(),
-			blockInsertionPoint: getBlockInsertionPoint(),
 			sectionRootClientId: root,
 			setInserterIsOpened:
 				getSettings().__experimentalSetIsInserterOpened,
