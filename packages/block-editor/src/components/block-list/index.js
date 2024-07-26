@@ -179,7 +179,6 @@ function Items( {
 	// function on every render.
 	const hasAppender = CustomAppender !== false;
 	const hasCustomAppender = !! CustomAppender;
-
 	const { order, selectedBlocks, visibleBlocks, shouldRenderAppender } =
 		useSelect(
 			( select ) => {
@@ -193,6 +192,7 @@ function Items( {
 					getBlockEditingMode,
 					__unstableGetEditorMode,
 				} = select( blockEditorStore );
+
 				const _order = getBlockOrder( rootClientId );
 
 				if ( getSettings().__unstableIsPreviewMode ) {
@@ -202,8 +202,8 @@ function Items( {
 						visibleBlocks: EMPTY_SET,
 					};
 				}
-				const selectedBlockClientId = getSelectedBlockClientId();
 
+				const selectedBlockClientId = getSelectedBlockClientId();
 				return {
 					order: _order,
 					selectedBlocks: getSelectedBlockClientIds(),
