@@ -228,12 +228,14 @@ function Items( {
 		sectionRootClientId,
 		sectionClientIds,
 		blockInsertionPoint,
+		blockInsertionPointVisible,
 	} = useSelect( ( select ) => {
 		const {
 			getSettings,
 			__unstableGetEditorMode,
 			getBlockInsertionPoint,
 			getBlockOrder,
+			isBlockInsertionPointVisible,
 		} = unlock( select( blockEditorStore ) );
 
 		if ( __unstableGetEditorMode() === 'zoom-out' ) {
@@ -245,6 +247,7 @@ function Items( {
 				sectionClientIds: sectionRootClientIds,
 				blockOrder: getBlockOrder( root ),
 				blockInsertionPoint: getBlockInsertionPoint(),
+				blockInsertionPointVisible: isBlockInsertionPointVisible(),
 			};
 		}
 		return {};
@@ -274,12 +277,14 @@ function Items( {
 
 		if ( position === 'top' ) {
 			isVisible =
+				blockInsertionPointVisible &&
 				blockInsertionPoint.index === 0 &&
 				clientId === sectionClientIds[ blockInsertionPoint.index ];
 		}
 
 		if ( position === 'bottom' ) {
 			isVisible =
+				blockInsertionPointVisible &&
 				clientId === sectionClientIds[ blockInsertionPoint.index - 1 ];
 		}
 
