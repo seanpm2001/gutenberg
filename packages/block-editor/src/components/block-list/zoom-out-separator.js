@@ -95,7 +95,7 @@ export function ZoomOutSeparator( {
 						duration: 0.25,
 						ease: 'easeInOut',
 					} }
-					className="zoom-out-separator"
+					className="block-editor-block-list__zoom-out-separator"
 				></motion.div>
 			) }
 		</AnimatePresence>
