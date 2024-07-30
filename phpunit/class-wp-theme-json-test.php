@@ -4849,7 +4849,16 @@ class WP_Theme_JSON_Gutenberg_Test extends WP_UnitTestCase {
 			array(
 				'version' => WP_Theme_JSON_Gutenberg::LATEST_SCHEMA,
 				'styles'  => array(
-					'blocks' => array(
+					'background' => array(
+						'backgroundImage'      => array(
+							'url' => 'http://example.org/top.png',
+						),
+						'backgroundSize'       => 'contain',
+						'backgroundRepeat'     => 'repeat',
+						'backgroundPosition'   => '10% 20%',
+						'backgroundAttachment' => 'scroll',
+					),
+					'blocks'     => array(
 						'core/group' => array(
 							'background' => array(
 								'backgroundImage'      => "url('http://example.org/group.png')",
@@ -4869,6 +4878,25 @@ class WP_Theme_JSON_Gutenberg_Test extends WP_UnitTestCase {
 								'backgroundPosition' => 'center center',
 							),
 						),
+						'core/verse' => array(
+							'background' => array(
+								'backgroundImage'      => array(
+									'ref' => 'styles.background.backgroundImage',
+								),
+								'backgroundSize'       => array(
+									'ref' => 'styles.background.backgroundSize',
+								),
+								'backgroundRepeat'     => array(
+									'ref' => 'styles.background.backgroundRepeat',
+								),
+								'backgroundPosition'   => array(
+									'ref' => 'styles.background.backgroundPosition',
+								),
+								'backgroundAttachment' => array(
+									'ref' => 'styles.background.backgroundAttachment',
+								),
+							),
+						),
 					),
 				),
 			)
@@ -4884,7 +4912,7 @@ class WP_Theme_JSON_Gutenberg_Test extends WP_UnitTestCase {
 		);
 
 		$quote_styles = ":root :where(.wp-block-quote){background-image: url('http://example.org/quote.png');background-position: center center;background-repeat: no-repeat;background-size: cover;}";
-		$this->assertSameCSS( $quote_styles, $theme_json->get_styles_for_block( $quote_node ), 'Styles returned from "::get_styles_for_block()" with block-level background styles do not match expectations' );
+		$this->assertSameCSS( $quote_styles, $theme_json->get_styles_for_block( $quote_node ), 'Styles returned from "::get_styles_for_block()" with core/quote background styles do not match expectations' );
 
 		$group_node = array(
 			'name'      => 'core/group',
@@ -4896,7 +4924,19 @@ class WP_Theme_JSON_Gutenberg_Test extends WP_UnitTestCase {
 		);
 
 		$group_styles = ":root :where(.wp-block-group){background-image: url('http://example.org/group.png');background-position: center center;background-repeat: no-repeat;background-size: cover;background-attachment: fixed;}";
-		$this->assertSameCSS( $group_styles, $theme_json->get_styles_for_block( $group_node ), 'Styles returned from "::get_styles_for_block()" with block-level background styles as string type do not match expectations' );
+		$this->assertSameCSS( $group_styles, $theme_json->get_styles_for_block( $group_node ), 'Styles returned from "::get_styles_for_block()" with core/group  background styles as string type do not match expectations' );
+
+		$verse_node = array(
+			'name'      => 'core/verse',
+			'path'      => array( 'styles', 'blocks', 'core/verse' ),
+			'selector'  => '.wp-block-verse',
+			'selectors' => array(
+				'root' => '.wp-block-verse',
+			),
+		);
+
+		$verse_styles = ":root :where(.wp-block-verse){background-image: url('http://example.org/top.png');background-position: 10% 20%;background-repeat: repeat;background-size: contain;background-attachment: scroll;}";
+		$this->assertSameCSS( $verse_styles, $theme_json->get_styles_for_block( $verse_node ), 'Styles returned from "::get_styles_for_block()" with core/verse background ref styles as string type do not match expectations' );
 	}
 
 	/**
