@@ -34,6 +34,7 @@ import {
 	useRef,
 	useState,
 	useEffect,
+	useMemo,
 } from '@wordpress/element';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { focus } from '@wordpress/dom';
@@ -42,11 +43,15 @@ import { isBlobURL } from '@wordpress/blob';
 /**
  * Internal dependencies
  */
-import { useToolsPanelDropdownMenuProps } from './utils';
+import { useToolsPanelDropdownMenuProps, getResolvedValue } from './utils';
 import { setImmutably } from '../../utils/object';
 import MediaReplaceFlow from '../media-replace-flow';
 import { store as blockEditorStore } from '../../store';
-import { getResolvedThemeFilePath } from './theme-file-uri-utils';
+
+import {
+	globalStylesDataKey,
+	globalStylesLinksDataKey,
+} from '../../store/private-keys';
 
 const IMAGE_BACKGROUND_TYPE = 'image';
 const DEFAULT_CONTROLS = {
@@ -269,7 +274,7 @@ function BackgroundImageControls( {
 	inheritedValue,
 	onRemoveImage = noop,
 	displayInPanel,
-	themeFileURIs,
+	defaultValues,
 } ) {
 	const mediaUpload = useSelect(
 		( select ) => select( blockEditorStore ).getSettings().mediaUpload,
@@ -318,7 +323,8 @@ function BackgroundImageControls( {
 			return;
 		}
 
-		const sizeValue = style?.background?.backgroundSize;
+		const sizeValue =
+			style?.background?.backgroundSize || defaultValues?.backgroundSize;
 		const positionValue = style?.background?.backgroundPosition;
 
 		onChange(
@@ -334,6 +340,7 @@ function BackgroundImageControls( {
 					! positionValue && ( 'auto' === sizeValue || ! sizeValue )
 						? '50% 0'
 						: positionValue,
+				backgroundSize: sizeValue,
 			} )
 		);
 	};
@@ -393,10 +400,7 @@ function BackgroundImageControls( {
 				name={
 					<InspectorImagePreviewItem
 						className="block-editor-global-styles-background-panel__image-preview"
-						imgUrl={ getResolvedThemeFilePath(
-							url,
-							themeFileURIs
-						) }
+						imgUrl={ url }
 						filename={ title }
 						label={ imgLabel }
 					/>
@@ -437,7 +441,6 @@ function BackgroundSizeControls( {
 	style,
 	inheritedValue,
 	defaultValues,
-	themeFileURIs,
 } ) {
 	const sizeValue =
 		style?.background?.backgroundSize ||
@@ -564,7 +567,7 @@ function BackgroundSizeControls( {
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
 				label={ __( 'Focal point' ) }
-				url={ getResolvedThemeFilePath( imageValue, themeFileURIs ) }
+				url={ imageValue }
 				value={ backgroundPositionToCoords( positionValue ) }
 				onChange={ updateBackgroundPosition }
 			/>
@@ -677,8 +680,44 @@ export default function BackgroundPanel( {
 	defaultControls = DEFAULT_CONTROLS,
 	defaultValues = {},
 	headerLabel = __( 'Background image' ),
-	themeFileURIs,
 } ) {
+	/*
+	 * Resolve any inherited "ref" pointers.
+	 * Should the block editor need resolved, inherited values
+	 * across all controls, this could be abstracted into a hook,
+	 * e.g., useResolveGlobalStyle
+	 */
+	const { globalStyles, _links } = useSelect( ( select ) => {
+		const { getSettings } = select( blockEditorStore );
+		const _settings = getSettings();
+		return {
+			globalStyles: _settings[ globalStylesDataKey ],
+			_links: _settings[ globalStylesLinksDataKey ],
+		};
+	}, [] );
+	const resolvedInheritedValue = useMemo( () => {
+		const resolvedValues = {
+			background: {},
+		};
+
+		if ( ! inheritedValue?.background ) {
+			return inheritedValue;
+		}
+
+		Object.entries( inheritedValue?.background ).forEach(
+			( [ key, backgroundValue ] ) => {
+				resolvedValues.background[ key ] = getResolvedValue(
+					backgroundValue,
+					{
+						styles: globalStyles,
+						_links,
+					}
+				);
+			}
+		);
+		return resolvedValues;
+	}, [ globalStyles, _links, inheritedValue ] );
+
 	const resetAllFilter = useCallback( ( previousValue ) => {
 		return {
 			...previousValue,
@@ -690,11 +729,11 @@ export default function BackgroundPanel( {
 		onChange( setImmutably( value, [ 'background' ], {} ) );
 
 	const { title, url } = value?.background?.backgroundImage || {
-		...inheritedValue?.background?.backgroundImage,
+		...resolvedInheritedValue?.background?.backgroundImage,
 	};
 	const hasImageValue =
 		hasBackgroundImageValue( value ) ||
-		hasBackgroundImageValue( inheritedValue );
+		hasBackgroundImageValue( resolvedInheritedValue );
 
 	const shouldShowBackgroundImageControls =
 		hasImageValue &&
@@ -731,10 +770,7 @@ export default function BackgroundPanel( {
 						<BackgroundControlsPanel
 							label={ title }
 							filename={ title }
-							url={ getResolvedThemeFilePath(
-								url,
-								themeFileURIs
-							) }
+							url={ url }
 							onToggle={ setIsDropDownOpen }
 							hasImageValue={ hasImageValue }
 						>
@@ -742,9 +778,9 @@ export default function BackgroundPanel( {
 								<BackgroundImageControls
 									onChange={ onChange }
 									style={ value }
-									inheritedValue={ inheritedValue }
-									themeFileURIs={ themeFileURIs }
+									inheritedValue={ resolvedInheritedValue }
 									displayInPanel
+									defaultValues={ defaultValues }
 									onRemoveImage={ () => {
 										setIsDropDownOpen( false );
 										resetBackground();
@@ -755,8 +791,7 @@ export default function BackgroundPanel( {
 									panelId={ panelId }
 									style={ value }
 									defaultValues={ defaultValues }
-									inheritedValue={ inheritedValue }
-									themeFileURIs={ themeFileURIs }
+									inheritedValue={ resolvedInheritedValue }
 								/>
 							</VStack>
 						</BackgroundControlsPanel>
@@ -764,8 +799,7 @@ export default function BackgroundPanel( {
 						<BackgroundImageControls
 							onChange={ onChange }
 							style={ value }
-							inheritedValue={ inheritedValue }
-							themeFileURIs={ themeFileURIs }
+							inheritedValue={ resolvedInheritedValue }
 						/>
 					) }
 				</ToolsPanelItem>

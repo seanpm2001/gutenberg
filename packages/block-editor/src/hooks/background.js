@@ -16,10 +16,7 @@ import {
 	useHasBackgroundPanel,
 	hasBackgroundImageValue,
 } from '../components/global-styles/background-panel';
-import {
-	globalStylesDataKey,
-	globalStylesLinksDataKey,
-} from '../store/private-keys';
+import { globalStylesDataKey } from '../store/private-keys';
 
 export const BACKGROUND_SUPPORT_KEY = 'background';
 
@@ -63,7 +60,7 @@ export function setBackgroundStyleDefaults( backgroundStyle ) {
 	let backgroundStylesWithDefaults;
 
 	// Set block background defaults.
-	if ( !! backgroundImage?.url || typeof backgroundImage === 'string' ) {
+	if ( !! backgroundImage?.url ) {
 		if ( ! backgroundStyle?.backgroundSize ) {
 			backgroundStylesWithDefaults = {
 				backgroundSize: 'cover',
@@ -138,14 +135,13 @@ export function BackgroundImagePanel( {
 	setAttributes,
 	settings,
 } ) {
-	const { style, inheritedValue, _links } = useSelect(
+	const { style, inheritedValue } = useSelect(
 		( select ) => {
 			const { getBlockAttributes, getSettings } =
 				select( blockEditorStore );
 			const _settings = getSettings();
 			return {
 				style: getBlockAttributes( clientId )?.style,
-				_links: _settings[ globalStylesLinksDataKey ],
 				/*
 				 * @TODO 1. Pass inherited value down to all block style controls,
 				 *   See: packages/block-editor/src/hooks/style.js
@@ -191,7 +187,6 @@ export function BackgroundImagePanel( {
 			settings={ updatedSettings }
 			onChange={ onChange }
 			value={ style }
-			themeFileURIs={ _links?.[ 'wp:theme-file' ] }
 		/>
 	);
 }
