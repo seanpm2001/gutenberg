@@ -20,7 +20,6 @@ export function ZoomOutSeparator( {
 	position = 'top',
 } ) {
 	const {
-		isZoomOut,
 		sectionRootClientId,
 		sectionClientIds,
 		blockInsertionPoint,
@@ -38,7 +37,6 @@ export function ZoomOutSeparator( {
 			const { sectionRootClientId: root } = unlock( getSettings() );
 			const sectionRootClientIds = getBlockOrder( root );
 			return {
-				isZoomOut: __unstableGetEditorMode() === 'zoom-out',
 				sectionRootClientId: root,
 				sectionClientIds: sectionRootClientIds,
 				blockOrder: getBlockOrder( root ),
@@ -50,7 +48,7 @@ export function ZoomOutSeparator( {
 	}, [] );
 
 	const isReducedMotion = useReducedMotion();
-	if ( ! isZoomOut || ! clientId ) {
+	if ( ! clientId ) {
 		return;
 	}
 

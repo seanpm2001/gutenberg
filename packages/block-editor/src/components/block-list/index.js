@@ -175,49 +175,55 @@ function Items( {
 	// function on every render.
 	const hasAppender = CustomAppender !== false;
 	const hasCustomAppender = !! CustomAppender;
-	const { order, selectedBlocks, visibleBlocks, shouldRenderAppender } =
-		useSelect(
-			( select ) => {
-				const {
-					getSettings,
-					getBlockOrder,
-					getSelectedBlockClientId,
-					getSelectedBlockClientIds,
-					__unstableGetVisibleBlocks,
-					getTemplateLock,
-					getBlockEditingMode,
-					__unstableGetEditorMode,
-				} = select( blockEditorStore );
+	const {
+		order,
+		isZoomOut,
+		selectedBlocks,
+		visibleBlocks,
+		shouldRenderAppender,
+	} = useSelect(
+		( select ) => {
+			const {
+				getSettings,
+				getBlockOrder,
+				getSelectedBlockClientId,
+				getSelectedBlockClientIds,
+				__unstableGetVisibleBlocks,
+				getTemplateLock,
+				getBlockEditingMode,
+				__unstableGetEditorMode,
+			} = select( blockEditorStore );
 
-				const _order = getBlockOrder( rootClientId );
+			const _order = getBlockOrder( rootClientId );
 
-				if ( getSettings().__unstableIsPreviewMode ) {
-					return {
-						order: _order,
-						selectedBlocks: EMPTY_ARRAY,
-						visibleBlocks: EMPTY_SET,
-					};
-				}
-
-				const selectedBlockClientId = getSelectedBlockClientId();
+			if ( getSettings().__unstableIsPreviewMode ) {
 				return {
 					order: _order,
-					selectedBlocks: getSelectedBlockClientIds(),
-					visibleBlocks: __unstableGetVisibleBlocks(),
-					shouldRenderAppender:
-						hasAppender &&
-						__unstableGetEditorMode() !== 'zoom-out' &&
-						( hasCustomAppender
-							? ! getTemplateLock( rootClientId ) &&
-							  getBlockEditingMode( rootClientId ) !== 'disabled'
-							: rootClientId === selectedBlockClientId ||
-							  ( ! rootClientId &&
-									! selectedBlockClientId &&
-									! _order.length ) ),
+					selectedBlocks: EMPTY_ARRAY,
+					visibleBlocks: EMPTY_SET,
 				};
-			},
-			[ rootClientId, hasAppender, hasCustomAppender ]
-		);
+			}
+
+			const selectedBlockClientId = getSelectedBlockClientId();
+			return {
+				order: _order,
+				selectedBlocks: getSelectedBlockClientIds(),
+				visibleBlocks: __unstableGetVisibleBlocks(),
+				isZoomOut: __unstableGetEditorMode() === 'zoom-out',
+				shouldRenderAppender:
+					hasAppender &&
+					__unstableGetEditorMode() !== 'zoom-out' &&
+					( hasCustomAppender
+						? ! getTemplateLock( rootClientId ) &&
+						  getBlockEditingMode( rootClientId ) !== 'disabled'
+						: rootClientId === selectedBlockClientId ||
+						  ( ! rootClientId &&
+								! selectedBlockClientId &&
+								! _order.length ) ),
+			};
+		},
+		[ rootClientId, hasAppender, hasCustomAppender ]
+	);
 
 	return (
 		<LayoutProvider value={ layout }>
@@ -231,20 +237,24 @@ function Items( {
 						! selectedBlocks.includes( clientId )
 					}
 				>
-					<ZoomOutSeparator
-						clientId={ clientId }
-						rootClientId={ rootClientId }
-						position="top"
-					/>
+					{ isZoomOut && (
+						<ZoomOutSeparator
+							clientId={ clientId }
+							rootClientId={ rootClientId }
+							position="top"
+						/>
+					) }
 					<BlockListBlock
 						rootClientId={ rootClientId }
 						clientId={ clientId }
 					/>
-					<ZoomOutSeparator
-						clientId={ clientId }
-						rootClientId={ rootClientId }
-						position="bottom"
-					/>
+					{ isZoomOut && (
+						<ZoomOutSeparator
+							clientId={ clientId }
+							rootClientId={ rootClientId }
+							position="bottom"
+						/>
+					) }
 				</AsyncModeProvider>
 			) ) }
 			{ order.length < 1 && placeholder }
