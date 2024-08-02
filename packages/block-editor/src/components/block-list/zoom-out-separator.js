@@ -86,6 +86,7 @@ export function ZoomOutSeparator( {
 					animate={ { height: '20vh' } }
 					exit={ { height: 0 } }
 					transition={ {
+						delay: 0.25,
 						duration: 0.25,
 						ease: 'easeInOut',
 					} }
