@@ -27,24 +27,20 @@ export function ZoomOutSeparator( {
 	} = useSelect( ( select ) => {
 		const {
 			getSettings,
-			__unstableGetEditorMode,
 			getBlockInsertionPoint,
 			getBlockOrder,
 			isBlockInsertionPointVisible,
 		} = unlock( select( blockEditorStore ) );
 
-		if ( __unstableGetEditorMode() === 'zoom-out' ) {
-			const { sectionRootClientId: root } = unlock( getSettings() );
-			const sectionRootClientIds = getBlockOrder( root );
-			return {
-				sectionRootClientId: root,
-				sectionClientIds: sectionRootClientIds,
-				blockOrder: getBlockOrder( root ),
-				blockInsertionPoint: getBlockInsertionPoint(),
-				blockInsertionPointVisible: isBlockInsertionPointVisible(),
-			};
-		}
-		return {};
+		const { sectionRootClientId: root } = unlock( getSettings() );
+		const sectionRootClientIds = getBlockOrder( root );
+		return {
+			sectionRootClientId: root,
+			sectionClientIds: sectionRootClientIds,
+			blockOrder: getBlockOrder( root ),
+			blockInsertionPoint: getBlockInsertionPoint(),
+			blockInsertionPointVisible: isBlockInsertionPointVisible(),
+		};
 	}, [] );
 
 	const isReducedMotion = useReducedMotion();
