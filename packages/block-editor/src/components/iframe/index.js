@@ -218,6 +218,7 @@ function Iframe( {
 	const isScaleFinal = useRef( false );
 	useEffect( () => {
 		if ( isZoomedOut ) {
+			priorContainerWidth.current = containerWidth;
 			return () => {
 				isScaleFinal.current = false;
 				const { documentElement, defaultView } = iframeDocument;
@@ -230,13 +231,7 @@ function Iframe( {
 				);
 			};
 		}
-	}, [ isZoomedOut ] );
-
-	useEffect( () => {
-		if ( ! isZoomedOut ) {
-			priorContainerWidth.current = containerWidth;
-		}
-	}, [ containerWidth, isZoomedOut ] );
+	}, [ isZoomedOut ] ); // containerWidth omitted as it needs read only when zoom out engages.
 
 	const disabledRef = useDisabled( { isDisabled: ! readonly } );
 	const bodyRef = useMergeRefs( [
