@@ -48,7 +48,22 @@ function PostEditForm( { postType, postId } ) {
 	);
 	const registry = useRegistry();
 	const { saveEntityRecord } = useDispatch( coreDataStore );
-	const { fields } = usePostFields();
+	const { fields: _fields } = usePostFields();
+	const fields = useMemo(
+		() =>
+			_fields?.map( ( field ) => {
+				if ( field.id === 'status' ) {
+					return {
+						...field,
+						elements: field.elements.filter(
+							( element ) => element.value !== 'trash'
+						),
+					};
+				}
+				return field;
+			} ),
+		[ _fields ]
+	);
 	const form = {
 		type: 'panel',
 		fields: [ 'title', 'author', 'date', 'comment_status', 'status' ],
