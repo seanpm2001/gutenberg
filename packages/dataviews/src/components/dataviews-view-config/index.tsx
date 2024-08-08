@@ -24,7 +24,7 @@ import {
 } from '@wordpress/components';
 import { __, _x } from '@wordpress/i18n';
 import { memo, useContext, useState, useMemo } from '@wordpress/element';
-import { cog, seen, unseen } from '@wordpress/icons';
+import { arrowDown, arrowUp, cog, seen, unseen } from '@wordpress/icons';
 import warning from '@wordpress/warning';
 
 /**
@@ -32,7 +32,7 @@ import warning from '@wordpress/warning';
  */
 import { SORTING_DIRECTIONS, sortIcons, sortLabels } from '../../constants';
 import { VIEW_LAYOUTS, getMandatoryFields } from '../../dataviews-layouts';
-import type { SupportedLayouts } from '../../types';
+import type { NormalizedField, SupportedLayouts } from '../../types';
 import DataViewsContext from '../dataviews-context';
 import { unlock } from '../../lock-unlock';
 
@@ -218,46 +218,116 @@ function ItemsPerPageControl() {
 	);
 }
 
+function isFieldHidable(
+	field: NormalizedField< any >,
+	mandatoryFields: string | any[]
+) {
+	return (
+		field.enableHiding !== false && ! mandatoryFields.includes( field.id )
+	);
+}
+function isFieldSortable( field: NormalizedField< any > ) {
+	return field.enableSorting !== false;
+}
+
 function FieldControl() {
 	const { view, fields, onChangeView } = useContext( DataViewsContext );
 	const mandatoryFields = getMandatoryFields( view );
-	const hidableFields = fields.filter(
-		( field ) =>
-			field.enableHiding !== false &&
-			! mandatoryFields.includes( field.id )
-	);
 	const viewFields = view.fields || fields.map( ( field ) => field.id );
-	if ( ! hidableFields?.length ) {
+	if (
+		! fields?.some(
+			( field ) =>
+				isFieldHidable( field, mandatoryFields ) ||
+				isFieldSortable( field )
+		)
+	) {
 		return null;
 	}
 	return (
 		<ItemGroup isBordered isSeparated>
-			{ hidableFields?.map( ( field ) => {
+			{ fields?.map( ( field ) => {
+				const isHidable = isFieldHidable( field, mandatoryFields );
+				const isSortable = isFieldSortable( field );
+				if ( ! isHidable && ! isSortable ) {
+					return null;
+				}
 				const isVisible = viewFields.includes( field.id );
 				return (
 					<Item key={ field.id }>
 						<HStack expanded>
 							<span>{ field.label }</span>
-							<Button
-								className="'dataviews-view-config__field-control-button"
-								size="compact"
-								onClick={ () =>
-									onChangeView( {
-										...view,
-										fields: isVisible
-											? viewFields.filter(
-													( id ) => id !== field.id
-											  )
-											: [ ...viewFields, field.id ],
-									} )
-								}
-								icon={ isVisible ? seen : unseen }
-								label={
-									isVisible
-										? __( 'Hide field' )
-										: __( 'Show field' )
-								}
-							/>
+							<HStack justify="flex-end">
+								<Button
+									isPressed={
+										view.sort?.field === field.id &&
+										view.sort?.direction === 'asc'
+									}
+									disabled={ ! isSortable }
+									accessibleWhenDisabled={ false }
+									size="compact"
+									onClick={ () =>
+										onChangeView( {
+											...view,
+											sort: {
+												direction: 'asc',
+												field: field.id,
+											},
+										} )
+									}
+									icon={ arrowUp }
+									label={
+										isVisible
+											? __( 'Remove from sort' )
+											: __( 'Add to sort' )
+									}
+								/>
+								<Button
+									isPressed={
+										view.sort?.field === field.id &&
+										view.sort?.direction === 'desc'
+									}
+									disabled={ ! isSortable }
+									accessibleWhenDisabled={ false }
+									size="compact"
+									onClick={ () =>
+										onChangeView( {
+											...view,
+											sort: {
+												direction: 'desc',
+												field: field.id,
+											},
+										} )
+									}
+									icon={ arrowDown }
+									label={
+										isVisible
+											? __( 'Remove from sort' )
+											: __( 'Add to sort' )
+									}
+								/>
+								<Button
+									disabled={ ! isHidable }
+									accessibleWhenDisabled={ false }
+									size="compact"
+									onClick={ () =>
+										onChangeView( {
+											...view,
+											fields: isVisible
+												? viewFields.filter(
+														( id ) =>
+															id !== field.id
+												  )
+												: [ ...viewFields, field.id ],
+										} )
+									}
+									icon={ isVisible ? seen : unseen }
+									label={
+										isVisible
+											? __( 'Hide field' )
+											: __( 'Show field' )
+									}
+								/>
+							</HStack>
 						</HStack>
 					</Item>
 				);
