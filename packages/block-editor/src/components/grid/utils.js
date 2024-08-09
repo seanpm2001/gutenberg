@@ -1,7 +1,3 @@
-export function range( start, length ) {
-	return Array.from( { length }, ( _, i ) => start + i );
-}
-
 export class GridRect {
 	constructor( {
 		columnStart,
@@ -113,66 +109,4 @@ export function getClosestTrack( tracks, position, edge = 'start' ) {
 				: closest,
 		0
 	);
-}
-
-export function getGridRect( gridElement, rect ) {
-	const columnGap = parseFloat( getComputedCSS( gridElement, 'column-gap' ) );
-	const rowGap = parseFloat( getComputedCSS( gridElement, 'row-gap' ) );
-	const gridColumnTracks = getGridTracks(
-		getComputedCSS( gridElement, 'grid-template-columns' ),
-		columnGap
-	);
-	const gridRowTracks = getGridTracks(
-		getComputedCSS( gridElement, 'grid-template-rows' ),
-		rowGap
-	);
-	const columnStart = getClosestTrack( gridColumnTracks, rect.left ) + 1;
-	const rowStart = getClosestTrack( gridRowTracks, rect.top ) + 1;
-	const columnEnd =
-		getClosestTrack( gridColumnTracks, rect.right, 'end' ) + 1;
-	const rowEnd = getClosestTrack( gridRowTracks, rect.bottom, 'end' ) + 1;
-	return new GridRect( {
-		columnStart,
-		columnEnd,
-		rowStart,
-		rowEnd,
-	} );
-}
-
-export function getGridItemRect( gridItemElement ) {
-	return getGridRect(
-		gridItemElement.parentElement,
-		new window.DOMRect(
-			gridItemElement.offsetLeft,
-			gridItemElement.offsetTop,
-			gridItemElement.offsetWidth,
-			gridItemElement.offsetHeight
-		)
-	);
-}
-
-export function getGridInfo( gridElement ) {
-	const gridTemplateColumns = getComputedCSS(
-		gridElement,
-		'grid-template-columns'
-	);
-	const gridTemplateRows = getComputedCSS(
-		gridElement,
-		'grid-template-rows'
-	);
-	const numColumns = gridTemplateColumns.split( ' ' ).length;
-	const numRows = gridTemplateRows.split( ' ' ).length;
-	const numItems = numColumns * numRows;
-	return {
-		numColumns,
-		numRows,
-		numItems,
-		currentColor: getComputedCSS( gridElement, 'color' ),
-		style: {
-			gridTemplateColumns,
-			gridTemplateRows,
-			gap: getComputedCSS( gridElement, 'gap' ),
-			padding: getComputedCSS( gridElement, 'padding' ),
-		},
-	};
 }

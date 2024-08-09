@@ -6,7 +6,7 @@ import clsx from 'clsx';
 /**
  * WordPress dependencies
  */
-import { useState, useEffect, forwardRef, useMemo } from '@wordpress/element';
+import { useState, useEffect, forwardRef } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { __experimentalUseDropZone as useDropZone } from '@wordpress/compose';
 
@@ -15,10 +15,78 @@ import { __experimentalUseDropZone as useDropZone } from '@wordpress/compose';
  */
 import { useBlockElement } from '../block-list/use-block-props/use-block-refs';
 import BlockPopoverCover from '../block-popover/cover';
-import { range, GridRect, getGridInfo } from './utils';
+import { GridRect, getComputedCSS } from './utils';
 import { store as blockEditorStore } from '../../store';
 import { useGetNumberOfBlocksBeforeCell } from './use-get-number-of-blocks-before-cell';
 import ButtonBlockAppender from '../button-block-appender';
+
+function range( start, length ) {
+	return Array.from( { length }, ( _, i ) => start + i );
+}
+
+function getGridInfo( gridElement ) {
+	const gridTemplateColumns = getComputedCSS(
+		gridElement,
+		'grid-template-columns'
+	);
+	const gridTemplateRows = getComputedCSS(
+		gridElement,
+		'grid-template-rows'
+	);
+	const numColumns = gridTemplateColumns.split( ' ' ).length;
+	const numRows = gridTemplateRows.split( ' ' ).length;
+	const numItems = numColumns * numRows;
+	const occupiedRects = Array.from( gridElement.children ).map(
+		( gridItemElement ) => {
+			const parseAndCheckNaN = ( value ) => {
+				const parsed = parseInt( value, 10 );
+				return isNaN( parsed ) ? undefined : parsed;
+			};
+			const parseSpan = ( value ) => {
+				if ( value.startsWith( 'span ' ) ) {
+					return parseAndCheckNaN( value.split( ' ' )[ 1 ] );
+				}
+				return parseAndCheckNaN( value );
+			};
+			const columnStart = parseAndCheckNaN(
+				getComputedCSS( gridItemElement, 'grid-column-start' )
+			);
+			const rowStart = parseAndCheckNaN(
+				getComputedCSS( gridItemElement, 'grid-row-start' )
+			);
+			const columnEnd = parseSpan(
+				getComputedCSS( gridItemElement, 'grid-column-end' )
+			);
+			const rowEnd = parseSpan(
+				getComputedCSS( gridItemElement, 'grid-row-end' )
+			);
+			return new GridRect( {
+				columnStart,
+				rowStart,
+				// clean this up... we should just pass span if it's a span
+				columnEnd:
+					columnEnd !== undefined
+						? columnStart + columnEnd - 1
+						: undefined,
+				rowEnd:
+					rowEnd !== undefined ? rowStart + rowEnd - 1 : undefined,
+			} );
+		}
+	);
+	return {
+		numColumns,
+		numRows,
+		numItems,
+		currentColor: getComputedCSS( gridElement, 'color' ),
+		style: {
+			gridTemplateColumns,
+			gridTemplateRows,
+			gap: getComputedCSS( gridElement, 'gap' ),
+			padding: getComputedCSS( gridElement, 'padding' ),
+		},
+		occupiedRects,
+	};
+}
 
 export function GridVisualizer( { clientId, contentRef, parentLayout } ) {
 	const isDistractionFree = useSelect(
@@ -117,38 +185,9 @@ const GridVisualizerGrid = forwardRef(
 
 function ManualGridVisualizer( { gridClientId, gridInfo } ) {
 	const [ highlightedRect, setHighlightedRect ] = useState( null );
-
-	const gridItems = useSelect(
-		( select ) => select( blockEditorStore ).getBlocks( gridClientId ),
-		[ gridClientId ]
-	);
-	const occupiedRects = useMemo( () => {
-		const rects = [];
-		for ( const block of gridItems ) {
-			const {
-				columnStart,
-				rowStart,
-				columnSpan = 1,
-				rowSpan = 1,
-			} = block.attributes.style?.layout || {};
-			if ( ! columnStart || ! rowStart ) {
-				continue;
-			}
-			rects.push(
-				new GridRect( {
-					columnStart,
-					rowStart,
-					columnSpan,
-					rowSpan,
-				} )
-			);
-		}
-		return rects;
-	}, [ gridItems ] );
-
 	return range( 1, gridInfo.numRows ).map( ( row ) =>
 		range( 1, gridInfo.numColumns ).map( ( column ) => {
-			const isCellOccupied = occupiedRects.some( ( rect ) =>
+			const isCellOccupied = gridInfo.occupiedRects.some( ( rect ) =>
 				rect.contains( column, row )
 			);
 			const isHighlighted =
