@@ -66,7 +66,7 @@ function PostEditForm( { postType, postId } ) {
 	);
 	const form = {
 		type: 'panel',
-		fields: [ 'title', 'author', 'date', 'comment_status', 'status' ],
+		fields: [ 'title', 'status', 'date', 'author', 'comment_status' ],
 	};
 	const [ edits, setEdits ] = useState( initialEdits );
 	const itemWithEdits = useMemo( () => {
