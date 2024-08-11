@@ -14,6 +14,7 @@ module.exports = [
 	...Object.entries( importedVendors ).flatMap( ( [ name, config ] ) => {
 		return [ 'production', 'development' ].map( ( mode ) => {
 			return {
+				name: `${ name }-${ mode }`,
 				mode,
 				target: 'browserslist',
 				output: {
@@ -32,9 +33,14 @@ module.exports = [
 						},
 					},
 				},
-
 				externals: {
 					react: 'React',
+				},
+				stats: {
+					preset: 'minimal',
+					assets: false,
+					version: false,
+					modules: false,
 				},
 			};
 		} );

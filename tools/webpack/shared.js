@@ -56,6 +56,12 @@ const baseConfig = {
 		aggregateTimeout: 500,
 	},
 	devtool,
+	stats: {
+		preset: 'minimal',
+		assets: false,
+		version: false,
+		modules: false,
+	},
 };
 
 const plugins = [
@@ -75,7 +81,7 @@ const plugins = [
 		'globalThis.SCRIPT_DEBUG': JSON.stringify( mode === 'development' ),
 	} ),
 	mode === 'production' && new ReadableJsAssetsWebpackPlugin(),
-];
+].filter( Boolean );
 
 const stylesTransform = ( content ) => {
 	return postcss( [

@@ -35,9 +35,13 @@ process.env.WP_SRC_DIRECTORY = hasArgInCLI( '--webpack-src-dir' )
 	: 'src';
 
 const webpackArgs = getWebpackArgs();
+if ( hasArgInCLI( '--serve' ) ) {
+	webpackArgs.unshift( 'serve' );
+	webpackArgs.splice( webpackArgs.indexOf( '--serve' ), 1 );
+}
 if ( hasArgInCLI( '--hot' ) ) {
 	webpackArgs.unshift( 'serve' );
-} else if ( ! hasArgInCLI( '--no-watch' ) ) {
+} else if ( ! hasArgInCLI( '--no-watch' ) && ! hasArgInCLI( '--serve' ) ) {
 	webpackArgs.unshift( 'watch' );
 }
 
